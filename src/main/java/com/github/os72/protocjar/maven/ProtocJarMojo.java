@@ -19,12 +19,7 @@
 
 package com.github.os72.protocjar.maven;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-
+import com.github.os72.protocjar.Protoc;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -32,7 +27,11 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
-import com.github.os72.protocjar.Protoc;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Compiles .proto files using protoc-jar embedded protoc compiler (external protoc executable also supported)
@@ -182,9 +181,50 @@ public class ProtocJarMojo extends AbstractMojo
 				String subdir = "generated-" + ("test".equals(target.addSources) ? "test-" : "") + "sources";
 				target.outputDirectory = new File(project.getBuild().getDirectory() + File.separator + subdir + File.separator);
 			}
+
+			// Copy files to a temporary directory.
+			target.outputDirectoryFinal = target.outputDirectory;
+			target.outputDirectory = new File(target.outputDirectory.getParent(), target.outputDirectory.getName() + "-tmp");
 		}
 		
 		performProtoCompilation();
+	}
+
+	private void copyAndUpdateOutputTarget(OutputTarget outputTarget) throws MojoExecutionException {
+		File src = outputTarget.outputDirectory;
+		File dst = outputTarget.outputDirectoryFinal;
+
+		dst.mkdirs();
+
+		// List files in dst and copy them to target.
+		Collection<File> files = org.apache.commons.io.FileUtils.listFiles(src, null, true);
+
+		for (File generatedFile : files) {
+			String path = generatedFile.getAbsolutePath();
+			path = path.replaceAll("^" + src.getAbsolutePath(), dst.getAbsolutePath());
+			File targetFile = new File(path);
+
+			try {
+				if (org.apache.commons.io.FileUtils.contentEquals(generatedFile, targetFile)) {
+					getLog().info("Skipping " + targetFile.getName());
+					continue;
+				}
+			} catch (IOException ignored) {
+				// Copy the file on any error, for e.g., if the dstFile does not exist.
+			}
+
+			try {
+				// Remove the target file if it already exists.
+				targetFile.delete();
+				org.apache.commons.io.FileUtils.copyFile(generatedFile, targetFile);
+				getLog().info("Updating " + targetFile.getName());
+			} catch (IOException e) {
+				throw new MojoExecutionException("Error copying file from " + targetFile + " to " + generatedFile, e);
+			}
+		}
+
+		// Update the output directory and restore to its true, final, path.
+		outputTarget.outputDirectory = outputTarget.outputDirectoryFinal;
 	}
 
 	private void performProtoCompilation() throws MojoExecutionException {	
@@ -246,13 +286,15 @@ public class ProtocJarMojo extends AbstractMojo
 		
 		boolean mainAddSources = "main".endsWith(target.addSources);
 		boolean testAddSources = "test".endsWith(target.addSources);
+
+		copyAndUpdateOutputTarget(target);
 		
 		if (mainAddSources) {
-			getLog().info("Adding generated classes to classpath");
+			getLog().info("Adding generated classes in " + target.outputDirectory.getAbsolutePath() + " to classpath");
 			project.addCompileSourceRoot(target.outputDirectory.getAbsolutePath());
 		}
 		if (testAddSources) {
-			getLog().info("Adding generated classes to test classpath");
+			getLog().info("Adding generated classes in " + target.outputDirectory.getAbsolutePath() + " to test classpath");
 			project.addTestCompileSourceRoot(target.outputDirectory.getAbsolutePath());
 		}
 		if (mainAddSources || testAddSources) {
