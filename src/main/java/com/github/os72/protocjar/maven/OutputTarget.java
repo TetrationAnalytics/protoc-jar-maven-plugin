@@ -12,6 +12,7 @@ public class OutputTarget
 		addSources = "main";
 		cleanOutputFolder = false;
 		outputDirectory = null;
+		outputDirectoryFinal = null;
 	}
 
 	/**
@@ -50,6 +51,12 @@ public class OutputTarget
 	 * @parameter property="outputDirectory"
 	 */
 	File outputDirectory;
+
+	/**
+	 * The output directory that we finally copy the file to, after doing a diff
+	 * to support incremental compilation correctly.
+	 */
+	File outputDirectoryFinal;
 
 	public String toString() {
 		return type + ": " + outputDirectory + " (add: " + addSources + ", clean: " + cleanOutputFolder + ")";
