@@ -268,7 +268,7 @@ public class ProtocJarMojo extends AbstractMojo
 
             try {
                 if (org.apache.commons.io.FileUtils.contentEquals(generatedFile, targetFile)) {
-                    getLog().info("Skipping " + targetFile.getName());
+                    getLog().debug("Skipping " + targetFile.getName());
                     continue;
                 }
             } catch (IOException ignored) {
@@ -279,7 +279,7 @@ public class ProtocJarMojo extends AbstractMojo
                 // Remove the target file if it already exists.
                 targetFile.delete();
                 org.apache.commons.io.FileUtils.copyFile(generatedFile, targetFile);
-                getLog().info("Updating " + targetFile.getName());
+                getLog().debug("Updating " + targetFile.getName());
             } catch (IOException e) {
                 throw new MojoExecutionException("Error copying file from " + targetFile + " to " + generatedFile, e);
             }
