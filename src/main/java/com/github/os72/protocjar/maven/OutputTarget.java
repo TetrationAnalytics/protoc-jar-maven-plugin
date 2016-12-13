@@ -69,11 +69,11 @@ public class OutputTarget
 	 */
 	File outputDirectory;
 
-    /**
-     * The output directory that we finally copy the file to, after doing a diff
-     * to support incremental compilation correctly.
-     */
-    File outputDirectoryFinal;
+	/**
+	 * The output directory that we finally copy the file to, after doing a diff
+	 * to support incremental compilation correctly.
+	 */
+	File outputDirectoryFinal;
 
 	/**
 	 * If this parameter is set, append its value to the {@link #outputDirectory} path

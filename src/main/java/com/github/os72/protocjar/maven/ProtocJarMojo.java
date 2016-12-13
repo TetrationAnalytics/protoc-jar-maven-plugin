@@ -290,50 +290,50 @@ public class ProtocJarMojo extends AbstractMojo
 				target.outputDirectory = new File(target.outputDirectory, target.outputDirectorySuffix);
 			}
 
-            // Copy files to a temporary directory.
-            target.outputDirectoryFinal = target.outputDirectory;
-            target.outputDirectory = new File(target.outputDirectory.getParent(), target.outputDirectory.getName() + "-tmp");
+			// Copy files to a temporary directory.
+			target.outputDirectoryFinal = target.outputDirectory;
+			target.outputDirectory = new File(target.outputDirectory.getParent(), target.outputDirectory.getName() + "-tmp");
 		}
 		
 		performProtoCompilation();
 	}
 
-    private void copyAndUpdateOutputTarget(OutputTarget outputTarget) throws MojoExecutionException {
-        File src = outputTarget.outputDirectory;
-        File dst = outputTarget.outputDirectoryFinal;
+	private void copyAndUpdateOutputTarget(OutputTarget outputTarget) throws MojoExecutionException {
+		File src = outputTarget.outputDirectory;
+		File dst = outputTarget.outputDirectoryFinal;
 
-        dst.mkdirs();
+		dst.mkdirs();
 
-        // List files in dst and copy them to target.
-        Collection<File> files = org.apache.commons.io.FileUtils.listFiles(src, null, true);
+		// List files in dst and copy them to target.
+		Collection<File> files = org.apache.commons.io.FileUtils.listFiles(src, null, true);
 
-        for (File generatedFile : files) {
-            String path = generatedFile.getAbsolutePath();
-            path = path.replaceAll("^" + src.getAbsolutePath(), dst.getAbsolutePath());
-            File targetFile = new File(path);
+		for (File generatedFile : files) {
+			String path = generatedFile.getAbsolutePath();
+			path = path.replaceAll("^" + src.getAbsolutePath(), dst.getAbsolutePath());
+			File targetFile = new File(path);
 
-            try {
-                if (org.apache.commons.io.FileUtils.contentEquals(generatedFile, targetFile)) {
-                    getLog().debug("Skipping " + targetFile.getName());
-                    continue;
-                }
-            } catch (IOException ignored) {
-                // Copy the file on any error, for e.g., if the dstFile does not exist.
-            }
+			try {
+				if (org.apache.commons.io.FileUtils.contentEquals(generatedFile, targetFile)) {
+					getLog().debug("Skipping " + targetFile.getName());
+					continue;
+				}
+			} catch (IOException ignored) {
+ 				// Copy the file on any error, for e.g., if the dstFile does not exist.
+  			}
 
-            try {
-                // Remove the target file if it already exists.
-                targetFile.delete();
-                org.apache.commons.io.FileUtils.copyFile(generatedFile, targetFile);
-                getLog().debug("Updating " + targetFile.getName());
-            } catch (IOException e) {
-                throw new MojoExecutionException("Error copying file from " + targetFile + " to " + generatedFile, e);
-            }
-        }
+			try {
+				// Remove the target file if it already exists.
+				targetFile.delete();
+				org.apache.commons.io.FileUtils.copyFile(generatedFile, targetFile);
+				getLog().debug("Updating " + targetFile.getName());
+			} catch (IOException e) {
+				throw new MojoExecutionException("Error copying file from " + targetFile + " to " + generatedFile, e);
+			}
+		}
 
-        // Update the output directory and restore to its true, final, path.
-        outputTarget.outputDirectory = outputTarget.outputDirectoryFinal;
-    }
+		// Update the output directory and restore to its true, final, path.
+		outputTarget.outputDirectory = outputTarget.outputDirectoryFinal;
+	}
 
 	private void performProtoCompilation() throws MojoExecutionException {
 		String protocTemp = null;
