@@ -451,6 +451,8 @@ public class ProtocJarMojo extends AbstractMojo
 		
 		boolean mainAddSources = "main".endsWith(target.addSources);
 		boolean testAddSources = "test".endsWith(target.addSources);
+
+        copyAndUpdateOutputTarget(target);
 		
 		if (mainAddSources) {
 			getLog().info("Adding generated classes in " + target.outputDirectory.getAbsolutePath() + " to classpath");
