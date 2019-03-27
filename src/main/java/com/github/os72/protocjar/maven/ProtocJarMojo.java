@@ -426,7 +426,7 @@ public class ProtocJarMojo extends AbstractMojo
 				Collection<File> protoFiles = FileUtils.listFiles(input, fileFilter, null);
 				for (File protoFile : protoFiles) {
 					if (target.cleanOutputFolder || buildContext.hasDelta(protoFile.getPath())) {
-						processFile(protoFile, protocVersion, targetType, target.pluginPath, target.outputDirectory, target.outputOptions);
+						processFile(protoFile, protocVersion, targetType, target.pluginPath, target.injectionPlugins, target.outputDirectory, target.outputOptions);
 					}
 					else {
 						getLog().info("Not changed " + protoFile);
@@ -467,9 +467,9 @@ public class ProtocJarMojo extends AbstractMojo
 		}
 	}
 
-	private void processFile(File file, String version, String type, String pluginPath, File outputDir, String outputOptions) throws MojoExecutionException {
+	private void processFile(File file, String version, String type, String pluginPath, InjectionPlugin[] injectionPlugins, File outputDir, String outputOptions) throws MojoExecutionException {
 		getLog().info("    Processing ("+ type + "): " + file.getName());
-		Collection<String> cmd = buildCommand(file, version, type, pluginPath, outputDir, outputOptions);
+		Collection<String> cmd = buildCommand(file, version, type, pluginPath, injectionPlugins, outputDir, outputOptions);
 		try {
 			int ret = 0;
 			if (protocCommand == null) ret = Protoc.runProtoc(cmd.toArray(new String[0]));
@@ -484,7 +484,7 @@ public class ProtocJarMojo extends AbstractMojo
 		}
 	}
 
-	private Collection<String> buildCommand(File file, String version, String type, String pluginPath, File outputDir, String outputOptions) throws MojoExecutionException {
+	private Collection<String> buildCommand(File file, String version, String type, String pluginPath, InjectionPlugin[] injectionPlugins, File outputDir, String outputOptions) throws MojoExecutionException {
 		Collection<String> cmd = new ArrayList<String>();
 		populateIncludes(cmd);
 		cmd.add("-I" + file.getParentFile().getAbsolutePath());
@@ -504,6 +504,11 @@ public class ProtocJarMojo extends AbstractMojo
 			if (pluginPath != null) {
 				getLog().info("    Plugin path: " + pluginPath);
 				cmd.add("--plugin=protoc-gen-" + type + "=" + pluginPath);
+			} else if (injectionPlugins != null && injectionPlugins.length > 0) {
+				for (InjectionPlugin injectionPlugin : injectionPlugins) {
+					cmd.add("--plugin=protoc-gen-" + injectionPlugin.name + "=" + injectionPlugin.pluginExecutable);
+					cmd.add("--" + injectionPlugin.name + "_out=" + outputDir);
+				}
 			}
 		}
 		cmd.add(file.toString());

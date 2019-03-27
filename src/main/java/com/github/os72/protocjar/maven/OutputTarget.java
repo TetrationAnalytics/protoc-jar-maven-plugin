@@ -13,6 +13,7 @@ public class OutputTarget
 		addSources = "main";
 		cleanOutputFolder = false;
 		pluginPath = null;
+		injectionPlugins = null;
 		outputDirectory = null;
 		outputOptions = null;
 	}
@@ -50,6 +51,8 @@ public class OutputTarget
 	 * @parameter property="pluginPath"
 	 */
 	String pluginPath;
+
+	InjectionPlugin[] injectionPlugins;
 
 	/**
 	 * Maven artifact coordinates of the protoc plugin that generates code for the specified {@link #type}.
