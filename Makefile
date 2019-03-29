@@ -8,4 +8,4 @@ install:
 	mvn clean install
 
 publish:
-	mvn -D VERSION=$(VERSION) -DaltDeploymentRepository=central::default::http://artifactory.tetrationanalytics.com:8081/artifactory/libs-snapshot-local deploy
+	mvn -D VERSION=$(VERSION) -DaltDeploymentRepository=central::default::http://artifactory.tetrationanalytics.com:8081/artifactory/libs-snapshot-local -Dmaven.javadoc.skip=true deploy
