@@ -166,5 +166,45 @@
 		</plugin>
 	</plugins>
   </reporting>
-
+  <repositories>
+        <repository>
+            <id>maven-central</id>
+            <name>central</name>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.tetrationanalytics.com:8081/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>libs-snapshot</name>
+            <url>http://artifactory.tetrationanalytics.com:8081/artifactory/libs-snapshot</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>plugins-snapshot</name>
+            <url>http://artifactory.tetrationanalytics.com:8081/artifactory/plugins-snapshot</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>release</id>
+            <name>plugins-release</name>
+            <url>http://artifactory.tetrationanalytics.com:8081/artifactory/plugins-release</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>artifactory.tetrationanalytics.com-releases</name>
+            <url>http://artifactory.tetrationanalytics.com:8081/artifactory/libs-release-local</url>
+        </repository>
+    </distributionManagement>
 </project>
